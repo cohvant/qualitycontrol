@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineer Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            background-image: url('background.jpg');
+            /* Replace with your image */
+            background-size: cover;
+            background-blend-mode: overlay;
+            color: #333;
+        }
+
+        .top-header {
+            background-color: rgba(52, 58, 64, 0.9);
+            /* Dark gray with transparency */
+            color: white;
+            padding: 1rem 2rem;
+            /* Increased padding for better spacing */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            /* Ensure it stays on top */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+        }
+
+        .top-header .user-profile {
+            display: flex;
+            align-items: center;
+            margin-right: 1rem;
+        }
+
+        .top-header img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+        }
+
+        .top-header .user-profile span {
+            margin-left: 0.5rem;
+        }
+
+        .top-header button {
+            margin-left: 1rem;
+        }
+
+        /* Sidebar Styles */
+        #sidebar {
+            position: fixed;
+            top: 70px;
+            /* Adjusted for top header */
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            /* Semi-transparent white */
+            transition: width 0.3s ease;
+            width: 250px;
+            /* Default width */
+            display: block;
+        }
+
+        #sidebar ul {
+            padding: 0;
+        }
+
+        #sidebar .nav-link {
+            font-weight: 500;
+            color: #333;
+            padding: 0.75rem 1rem;
+            transition: background-color 0.2s ease;
+        }
+
+        #sidebar .nav-link i {
+            margin-right: 0.5rem;
+            color: #555;
+        }
+
+        #sidebar .nav-link.active {
+            color: #007bff;
+            background-color: rgba(0, 123, 255, 0.1);
+            /* Light blue highlight */
+        }
+
+        #sidebar .nav-link:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            /* Light gray hover */
+        }
+
+        /* Sub-item styles */
+        #sidebar .nav-item .collapse {
+            background-color: rgba(0, 0, 0, 0.03);
+            border-radius: 5px;
+            margin: 0.25rem 0;
+        }
+
+        #sidebar .nav-item .collapse .nav-link {
+            padding-left: 2rem;
+        }
+
+        /* Main Content Styles */
+        main {
+            padding: 15px;
+            margin-top: 70px;
+            /* Adjusted for top header */
+            margin-left: 250px;
+            /* Default margin */
+        }
+
+        main.expanded {
+            margin-left: 0;
+            /* Reduced margin when sidebar is hidden */
+        }
+
+        .content-area {
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.7);
+            /* Semi-transparent white */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .content {
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+            border: none;
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+            border-radius: 0.75rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            color: #343a40;
+            margin-bottom: 1rem;
+        }
+
+        /* Tabs Styles */
+        .tab-content {
+            margin-top: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            #sidebar {
+                display: none;
+                /* Hide sidebar on smaller screens by default */
+            }
+
+            main {
+                margin-left: 0;
+                /* Remove margin on smaller screens */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Header Bar -->
+    <header class="top-header">
+        <h1><i class="fas fa-cog"></i> Engineer Dashboard</h1>
+        <button id="sidebarToggle" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="user-profile">
+            <img src="profile.jpg" alt="User Profile Picture">
+            <span>Engineer User</span>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-sticky">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" data-target="dashboardContent">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-toggle="collapse" data-target="#machineMenu">
+                        <i class="fas fa-cogs"></i> Machine Management <i class="fas fa-caret-down"></i>
+                    </a>
+                    <div class="collapse" id="machineMenu">
+                        <ul class="nav flex-column ml-3">
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="machineStatusContent">
+                                    <i class="fas fa-circle-notch"></i> Machine Status
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="machineMaintenanceContent">
+                                    <i class="fas fa-wrench"></i> Machine Maintenance
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-toggle="collapse" data-target="#qualityMenu">
+                        <i class="fas fa-check-circle"></i> Quality Control <i class="fas fa-caret-down"></i>
+                    </a>
+                    <div class="collapse" id="qualityMenu">
+                        <ul class="nav flex-column ml-3">
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="defectAnalysisContent">
+                                    <i class="fas fa-exclamation-triangle"></i> Defect Analysis
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="qualityMetricsContent">
+                                    <i class="fas fa-chart-line"></i> Quality Metrics
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-toggle="collapse" data-target="#reportMenu">
+                        <i class="fas fa-file-alt"></i> Reports <i class="fas fa-caret-down"></i>
+                    </a>
+                    <div class="collapse" id="reportMenu">
+                        <ul class="nav flex-column ml-3">
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="dailyReportContent">
+                                    <i class="fas fa-file-invoice"></i> Daily Report
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="weeklyReportContent">
+                                    <i class="fas fa-file-alt"></i> Weekly Report
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <!-- About System -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="aboutSystemContent">
+                        <i class="fas fa-info-circle"></i> About System
+                    </a>
+                </li>
+
+                <!-- Help -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="helpContent">
+                        <i class="fas fa-question-circle"></i> Help
+                    </a>
+                </li>
+
+                <li class="nav-item" onclick="event.preventDefault();document.location.href='index.html';">
+                    <a class="nav-link" href="login.html">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main role="main">
+        <div class="content-area">
+            <!-- Dashboard Content -->
+            <div id="dashboardContent" class="content active">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-check-circle"></i> Total Products Inspected</h5>
+                                <p class="card-text">12,543</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-times-circle"></i> Total Defects Found</h5>
+                                <p class="card-text">321</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-percentage"></i> Defect Rate</h5>
+                                <p class="card-text">2.56%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Machine Performance</h3>
+                <canvas class="my-4 w-100" id="machinePerformanceChart" width="900" height="380"></canvas>
+
+                <h3>Quality Metrics</h3>
+                <canvas class="my-4 w-100" id="qualityMetricsChart" width="900" height="380"></canvas>
+            </div>
+
+            <!-- Machine Status Content -->
+            <div id="machineStatusContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-circle-notch"></i> Machine Status</h5>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Machine ID</th>
+                                    <th>Status</th>
+                                    <th>Last Maintenance</th>
+                                    <th>Expected Uptime</th>
+                                    <th>Load Average</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Machine 1</td>
+                                    <td>Running</td>
+                                    <td>2025-03-01</td>
+                                    <td>99.9%</td>
+                                    <td>0.75</td>
+                                </tr>
+                                <tr>
+                                    <td>Machine 2</td>
+                                    <td>Offline</td>
+                                    <td>2025-02-20</td>
+                                    <td>95.0%</td>
+                                    <td>N/A</td>
+                                </tr>
+                                <tr>
+                                    <td>Machine 3</td>
+                                    <td>Running</td>
+                                    <td>2025-03-05</td>
+                                    <td>99.5%</td>
+                                    <td>0.60</td>
+                                </tr>
+                                <tr>
+                                    <td>AI Inspection System</td>
+                                    <td>Online</td>
+                                    <td>N/A</td>
+                                    <td>99.99%</td>
+                                    <td>0.2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Machine Maintenance Content -->
+            <div id="machineMaintenanceContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-wrench"></i> Machine Maintenance</h5>
+                        <p>Schedule maintenance for machines here.</p>
+                        <button class="btn btn-primary">Schedule Maintenance</button>
+
+                        <!-- Maintenance Log Table -->
+                        <h6 class="mt-4">Maintenance Log</h6>
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Machine ID</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Technician</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2025-03-01</td>
+                                    <td>Machine 1</td>
+                                    <td>Preventative</td>
+                                    <td>Replaced air filter and lubricated moving parts.</td>
+                                    <td>John Doe</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-02-20</td>
+                                    <td>Machine 2</td>
+                                    <td>Repair</td>
+                                    <td>Fixed broken conveyor belt.</td>
+                                    <td>Jane Smith</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-03-08</td>
+                                    <td>AI Inspection System</td>
+                                    <td>Software Update</td>
+                                    <td>Updated AI model for improved defect detection.</td>
+                                    <td>AI System Admin</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Defect Analysis Content -->
+            <div id="defectAnalysisContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-exclamation-triangle"></i> Defect Analysis</h5>
+                        <canvas class="my-4 w-100" id="defectAnalysisChart" width="900" height="380"></canvas>
+
+                        <!-- Defect Summary -->
+                        <h6 class="mt-4">Defect Summary</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Glass Breakage
+                                <span class="badge badge-primary badge-pill">14</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Foreign Objects
+                                <span class="badge badge-primary badge-pill">8</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Packaging Issues
+                                <span class="badge badge-primary badge-pill">22</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Labeling Errors
+                                <span class="badge badge-primary badge-pill">15</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quality Metrics Content -->
+            <div id="qualityMetricsContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-chart-line"></i> Quality Metrics</h5>
+                        <p>Track quality metrics over time.</p>
+                        <canvas class="my-4 w-100" id="qualityMetricsChart2" width="900" height="380"></canvas>
+
+                        <!-- Key Metrics -->
+                        <h6 class="mt-4">Key Quality Metrics</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>First Pass Yield:</strong> 98.5%</p>
+                                <p><strong>Customer Rejection Rate:</strong> 0.2%</p>
+                                <p><strong>Defect Rate (Current):</strong> 2.56%</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Internal Defect Rate:</strong> 1.3%</p>
+                                <p><strong>Supplier Defect Rate:</strong> 0.5%</p>
+                                <p><strong>Target Defect Rate (Objective 1):</strong> < 0.56% (2% Reduction)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Report Content -->
+            <div id="dailyReportContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-file-invoice"></i> Daily Report</h5>
+                        <p>View daily production and quality reports.</p>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Value</th>
+                                    <th>Target</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Total Products Inspected</td>
+                                    <td>1,050</td>
+                                    <td>1,000</td>
+                                </tr>
+                                <tr>
+                                    <td>Total Defects Found</td>
+                                    <td>8</td>
+                                    <td>≤ 10</td>
+                                </tr>
+                                <tr>
+                                    <td>Defect Rate</td>
+                                    <td>0.76%</td>
+                                    <td>≤ 1%</td>
+                                </tr>
+                                <tr>
+                                    <td>Customer Satisfaction Score</td>
+                                    <td>8.5/10</td>
+                                    <td>≥ 8/10</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Report Content -->
+            <div id="weeklyReportContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-file-alt"></i> Weekly Report</h5>
+                        <p>View weekly production and quality reports.</p>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Value</th>
+                                    <th>Target</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Total Products Inspected</td>
+                                    <td>7,350</td>
+                                    <td>7,000</td>
+                                </tr>
+                                <tr>
+                                    <td>Total Defects Found</td>
+                                    <td>53</td>
+                                    <td>≤ 70</td>
+                                </tr>
+                                <tr>
+                                    <td>Defect Rate</td>
+                                    <td>0.72%</td>
+                                    <td>≤ 1%</td>
+                                </tr>
+                                <tr>
+                                    <td>Customer Satisfaction Score</td>
+                                    <td>8.2/10</td>
+                                    <td>≥ 8/10</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About System Content -->
+            <div id="aboutSystemContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-info-circle"></i> About System</h5>
+                        <!-- Tabs -->
+                        <ul class="nav nav-tabs" id="aboutTabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="systemInfo-tab" data-toggle="tab"
+                                    href="#systemInfo" role="tab" aria-controls="systemInfo"
+                                    aria-selected="true">System Information</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="objectives-tab" data-toggle="tab" href="#objectives"
+                                    role="tab" aria-controls="objectives" aria-selected="false">Objectives</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="aiUsage-tab" data-toggle="tab" href="#aiUsage" role="tab"
+                                    aria-controls="aiUsage" aria-selected="false">AI Usage</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="architecture-tab" data-toggle="tab"
+                                    href="#architecture" role="tab" aria-controls="architecture"
+                                    aria-selected="false">Architecture</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="performance-tab" data-toggle="tab" href="#performance"
+                                    role="tab" aria-controls="performance" aria-selected="false">Performance</a>
+                            </li>
+                        </ul>
+
+                        <!-- Tab Contents -->
+                        <div class="tab-content" id="aboutTabsContent">
+                            <div class="tab-pane fade show active" id="systemInfo" role="tabpanel"
+                                aria-labelledby="systemInfo-tab">
+                                <h6>System Information</h6>
+                                <p><strong>System Name:</strong> AI-Enhanced Quality Control System</p>
+                                <p><strong>Version:</strong> 2.0</p>
+                                <p><strong>Developed By:</strong> Ian T Chigomere (R214155E)</p>
+                                <p><strong>Project Supervisor:</strong> Eng Mugwindiri</p>
+                                <p>
+                                    <strong>Description:</strong> An automated quality control prediction model based on
+                                    historical and real-time data, integrated with Six Sigma methodology to achieve
+                                    high precision defect detection.
+                                </p>
+                                <p><strong>Release Date:</strong> 2025-03-06</p>
+                                <p><strong>Contact:</strong> ian.chigomere@example.com</p>
+                            </div>
+                            <div class="tab-pane fade" id="objectives" role="tabpanel"
+                                aria-labelledby="objectives-tab">
+                                <h6>Objectives</h6>
+                                <ul>
+                                    <li><strong>Objective 1:</strong> Achieve a minimum reduction of at least 2% in the
+                                        defect rate compared to the current baseline by systematically identifying and
+                                        addressing the root causes of defects within the manufacturing process.</li>
+                                    <li><strong>Objective 2:</strong> Achieve a reduction in the product rejection rate by
+                                        5%, thus enhancing overall quality assurance processes and minimizing waste
+                                        within the manufacturing framework.</li>
+                                    <li><strong>Objective 3:</strong> Improve customer satisfaction score by 5% regarding
+                                        product quality.</li>
+                                    <li><strong>Objective 4:</strong> Conduct a financial analysis to ensure the solution
+                                        is a profitable investment for the business, delivering high returns on
+                                        implementation.</li>
+                                </ul>
+                            </div>
+                            <div class="tab-pane fade" id="aiUsage" role="tabpanel" aria-labelledby="aiUsage-tab">
+                                <h6>AI Usage</h6>
+                                <p>The system utilizes AI for:</p>
+                                <ul>
+                                    <li><strong>Defect Detection:</strong> AI algorithms analyze visual data to
+                                        automatically detect defects such as glass breakages, foreign objects, packaging
+                                        issues, and labeling errors.</li>
+                                    <li><strong>Predictive Maintenance:</strong> AI models predict machine failures to
+                                        enable proactive maintenance, reducing downtime and improving efficiency.</li>
+                                    <li><strong>Quality Prediction:</strong> AI forecasts product quality based on
+                                        various factors, ensuring only high-quality beverages reach the market.</li>
+                                    <li><strong>Automation:</strong> Automation of quality control processes reduces
+                                        human error and ensures consistent monitoring.</li>
+                                </ul>
+                            </div>
+                            <div class="tab-pane fade" id="architecture" role="tabpanel"
+                                aria-labelledby="architecture-tab">
+                                <h6>System Architecture</h6>
+                                <p>The system follows a three-tier architecture:</p>
+                                <ol>
+                                    <li><strong>Presentation Tier:</strong> User interface for engineers and
+                                        operators.</li>
+                                    <li><strong>Application Tier:</strong> Business logic and AI algorithms, including
+                                        descriptive statistics, inferential statistics, root cause analysis, and
+                                        visualization tools (Minitab, IBM SPSS).</li>
+                                    <li><strong>Data Tier:</strong> Database for storing production data, defect
+                                        information, customer feedback, and system logs.</li>
+                                </ol>
+                                <p>
+                                    The system is integrated with the Six Sigma methodology to enhance defect detection
+                                    precision.
+                                </p>
+                            </div>
+                            <div class="tab-pane fade" id="performance" role="tabpanel"
+                                aria-labelledby="performance-tab">
+                                <h6>System Performance</h6>
+                                <p><strong>Defect Detection Accuracy:</strong> 98%</p>
+                                <p><strong>Reduction in Defect Rate (Objective 1):</strong> 2%</p>
+                                <p><strong>Reduction in Product Rejection Rate (Objective 2):</strong> 5%</p>
+                                <p><strong>Customer Satisfaction Score Improvement (Objective 3):</strong> 5%</p>
+                                <p><strong>Processing Time per Product:</strong> 0.5 seconds</p>
+                                <p><strong>System Uptime:</strong> 99.9%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Content -->
+            <div id="helpContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-question-circle"></i> Help</h5>
+                        <!-- Accordions for Help Topics -->
+                        <div class="accordion" id="helpAccordion">
+                            <div class="card">
+                                <div class="card-header" id="headingOne">
+                                    <h2 class="mb-0">
+                                        <button class="btn btn-link btn-block text-left" type="button"
+                                            data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
+                                            aria-controls="collapseOne">
+                                            Dashboard Overview
+                                        </button>
+                                    </h2>
+                                </div>
+                                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
+                                    data-parent="#helpAccordion">
+                                    <div class="card-body">
+                                        The Dashboard provides a summary of key metrics such as Total Products
+                                        Inspected, Total Defects Found, and Defect Rate. Use the charts to analyze
+                                        machine performance and quality metrics.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header" id="headingTwo">
+                                    <h2 class="mb-0">
+                                        <button class="btn btn-link btn-block text-left collapsed" type="button"
+                                            data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false"
+                                            aria-controls="collapseTwo">
+                                            Machine Management
+                                        </button>
+                                    </h2>
+                                </div>
+                                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo"
+                                    data-parent="#helpAccordion">
+                                    <div class="card-body">
+                                        The Machine Management section allows you to monitor machine status and
+                                        schedule maintenance. Check the Machine Status for real-time updates and use
+                                        Machine Maintenance to schedule preventative maintenance.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header" id="headingThree">
+                                    <h2 class="mb-0">
+                                        <button class="btn btn-link btn-block text-left collapsed" type="button"
+                                            data-toggle="collapse" data-target="#collapseThree" aria-expanded="false"
+                                            aria-controls="collapseThree">
+                                            Quality Control
+                                        </button>
+                                    </h2>
+                                </div>
+                                <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
+                                    data-parent="#helpAccordion">
+                                    <div class="card-body">
+                                        The Quality Control section provides tools for defect analysis and quality
+                                        metric tracking. Use Defect Analysis to identify common defects and Quality
+                                        Metrics to monitor performance over time.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Function to create a chart
+            function createChart(canvasId, chartType, data, options) {
+                var ctx = document.getElementById(canvasId).getContext('2d');
+                new Chart(ctx, {
+                    type: chartType,
+                    data: data,
+                    options: options
+                });
+            }
+
+            // Sample chart data (replace with your actual data)
+            var machinePerformanceData = {
+                labels: ['Machine 1', 'Machine 2', 'Machine 3', 'AI Inspection'],
+                datasets: [{
+                    label: 'Uptime (%)',
+                    data: [99.5, 98.0, 99.8, 99.99],
+                    backgroundColor: ['rgba(54, 162, 235, 0.5)', 'rgba(255, 99, 132, 0.5)',
+                        'rgba(75, 192, 192, 0.5)', 'rgba(153, 102, 255, 0.5)'
+                    ],
+                    borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)',
+                        'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            var qualityMetricsData = {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Defect Rate (%)',
+                    data: [1.2, 0.9, 0.8, 0.6, 0.5, 0.4],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: true
+                }]
+            };
+
+            var defectAnalysisData = {
+                labels: ['Glass Breakage', 'Foreign Objects', 'Packaging Issues', 'Labeling Errors'],
+                datasets: [{
+                    label: 'Number of Defects',
+                    data: [50, 30, 20, 15],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+
+            var qualityMetricsData2 = {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Customer Satisfaction Score',
+                    data: [7.8, 8.2, 8.5, 8.7],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true
+                }]
+            };
+
+
+            // Chart options
+            var chartOptions = {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            };
+
+            // Create charts
+            createChart('machinePerformanceChart', 'bar', machinePerformanceData, chartOptions);
+            createChart('qualityMetricsChart', 'line', qualityMetricsData, chartOptions);
+            createChart('defectAnalysisChart', 'pie', defectAnalysisData, chartOptions);
+                     createChart('qualityMetricsChart2', 'line', qualityMetricsData2, chartOptions);
+
+
+            // Sidebar toggle functionality
+            $('#sidebarToggle').on('click', function () {
+                $('#sidebar').toggleClass('d-none');
+                $('main').toggleClass('expanded');
+            });
+
+            // Content switching functionality
+            $('.nav-link').on('click', function (e) {
+                e.preventDefault();
+                var target = $(this).data('target');
+
+                // Hide all content divs
+                $('.content').removeClass('active');
+
+                // Show the target content div
+                $('#' + target).addClass('active');
+
+                // Deactivate all nav links
+                $('.nav-link').removeClass('active');
+
+                // Activate the clicked nav link
+                $(this).addClass('active');
+
+                // Close the sidebar on smaller screens after clicking a link
+                if ($(window).width() <= 768) {
+                    $('#sidebar').addClass('d-none');
+                    $('main').addClass('expanded');
+                }
+            });
+            // Tab functionality for About System
+            $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
+        });
+    </script>
+</body>
+
+</html>
