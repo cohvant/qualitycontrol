@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            background-image: url('background.jpg'); /* Replace with your image */
+            background-size: cover;
+            background-blend-mode: overlay;
+            color: #333;
+        }
+
+        .top-header {
+            background-color: rgba(52, 58, 64, 0.9); /* Dark gray with transparency */
+            color: white;
+            padding: 1rem 2rem; /* Increased padding for better spacing */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000; /* Ensure it stays on top */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+        }
+
+        .top-header .user-profile {
+            display: flex;
+            align-items: center;
+            margin-right: 1rem;
+        }
+
+        .top-header img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+        }
+
+        .top-header .user-profile span {
+            margin-left: 0.5rem;
+        }
+
+        .top-header button {
+            margin-left: 1rem;
+        }
+
+        /* Sidebar Styles */
+        #sidebar {
+            position: fixed;
+            top: 70px; /* Adjusted for top header */
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 0;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+            transition: width 0.3s ease;
+            width: 250px; /* Default width */
+            display: block;
+        }
+
+        #sidebar ul {
+            padding: 0;
+        }
+
+        #sidebar .nav-link {
+            font-weight: 500;
+            color: #333;
+            padding: 0.75rem 1rem;
+            transition: background-color 0.2s ease;
+        }
+
+        #sidebar .nav-link i {
+            margin-right: 0.5rem;
+            color: #555;
+        }
+
+        #sidebar .nav-link.active {
+            color: #007bff;
+            background-color: rgba(0, 123, 255, 0.1); /* Light blue highlight */
+        }
+
+        #sidebar .nav-link:hover {
+            background-color: rgba(0, 0, 0, 0.05); /* Light gray hover */
+        }
+
+        /* Sub-item styles */
+        #sidebar .nav-item .collapse {
+            background-color: rgba(0, 0, 0, 0.03);
+            border-radius: 5px;
+            margin: 0.25rem 0;
+        }
+
+        #sidebar .nav-item .collapse .nav-link {
+            padding-left: 2rem;
+        }
+
+        /* Main Content Styles */
+        main {
+            padding: 15px;
+            margin-top: 70px; /* Adjusted for top header */
+            margin-left: 250px; /* Default margin */
+        }
+
+        main.expanded {
+            margin-left: 0; /* Reduced margin when sidebar is hidden */
+        }
+
+        .content-area {
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .content {
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+            border: none;
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+            border-radius: 0.75rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            color: #343a40;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            #sidebar {
+                display: none; /* Hide sidebar on smaller screens by default */
+            }
+
+            main {
+                margin-left: 0; /* Remove margin on smaller screens */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Header Bar -->
+    <header class="top-header">
+        <h1><i class="fas fa-cog"></i> Admin Dashboard</h1>
+        <button id="sidebarToggle" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="user-profile">
+            <img src="profile.jpg" alt="User Profile Picture">
+            <span>Admin User</span>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-sticky">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" data-target="dashboardContent">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-toggle="collapse" data-target="#userMenu">
+                        <i class="fas fa-users"></i> User Management <i class="fas fa-caret-down"></i>
+                    </a>
+                    <div class="collapse" id="userMenu">
+                        <ul class="nav flex-column ml-3">
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="createUserContent">
+                                    <i class="fas fa-plus"></i> Create User
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="manageUserContent">
+                                    <i class="fas fa-edit"></i> Manage Users
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-toggle="collapse" data-target="#systemMenu">
+                        <i class="fas fa-cogs"></i> System Configuration <i class="fas fa-caret-down"></i>
+                    </a>
+                    <div class="collapse" id="systemMenu">
+                        <ul class="nav flex-column ml-3">
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="settingsContent">
+                                    <i class="fas fa-sliders-h"></i> Settings
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="logsContent">
+                                    <i class="fas fa-history"></i> Logs
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-toggle="collapse" data-target="#reportMenu">
+                        <i class="fas fa-file-alt"></i> Reports <i class="fas fa-caret-down"></i>
+                    </a>
+                    <div class="collapse" id="reportMenu">
+                        <ul class="nav flex-column ml-3">
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="summaryReportContent">
+                                    <i class="fas fa-file-invoice"></i> Summary Report
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="detailedReportContent">
+                                    <i class="fas fa-file-alt"></i> Detailed Report
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-toggle="collapse" data-target="#dataMenu">
+                        <i class="fas fa-database"></i> Data Management <i class="fas fa-caret-down"></i>
+                    </a>
+                    <div class="collapse" id="dataMenu">
+                        <ul class="nav flex-column ml-3">
+                            <li class="nav-item">
+                                <a class="nav-link sub-item" href="#" data-target="backupContent">
+                                    <i class="fas fa-cloud-download-alt"></i> Backup Data
+                                </a>
+                                                     </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item"  onclick="event.preventDefault();document.location.href='index.html';">
+                    <a class="nav-link" href="login.html">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main role="main">
+        <div class="content-area">
+            <!-- Dashboard Content -->
+            <div id="dashboardContent" class="content active">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-check-circle"></i> Total Products Inspected</h5>
+                                <p class="card-text">12,543</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-times-circle"></i> Total Defects Found</h5>
+                                <p class="card-text">321</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-percentage"></i> Defect Rate</h5>
+                                <p class="card-text">2.56%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>User Activity</h3>
+                <canvas class="my-4 w-100" id="userActivityChart" width="900" height="380"></canvas>
+
+                <h3>Production Metrics</h3>
+                <canvas class="my-4 w-100" id="productionMetricsChart" width="900" height="380"></canvas>
+            </div>
+
+            <!-- Create User Content -->
+            <div id="createUserContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-plus"></i> Create User</h5>
+                        <form>
+                            <div class="form-group">
+                                <label for="newUsername">Username:</label>
+                                <input type="text" class="form-control" id="newUsername">
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">Password:</label>
+                                <input type="password" class="form-control" id="newPassword">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manage User Content -->
+            <div id="manageUserContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-edit"></i> Manage Users</h5>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>admin</td>
+                                    <td>Administrator</td>
+                                    <td><button class="btn btn-sm btn-danger">Delete</button></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>engineer1</td>
+                                    <td>Engineer</td>
+                                    <td><button class="btn btn-sm btn-danger">Delete</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Content -->
+            <div id="settingsContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-sliders-h"></i> Settings</h5>
+                        <form>
+                            <div class="form-group">
+                                <label for="systemName">System Name:</label>
+                                <input type="text" class="form-control" id="systemName" value="Quality Control System">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Content -->
+            <div id="logsContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-history"></i> Logs</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item">User 'admin' logged in at 2025-03-06 10:00:00</li>
+                            <li class="list-group-item">Data backup started at 2025-03-06 09:30:00</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Report Content -->
+            <div id="summaryReportContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-file-invoice"></i> Summary Report</h5>
+                        <ul>
+                            <li>Total Products Inspected: 12,543</li>
+                            <li>Total Defects Found: 321</li>
+                            <li>Defect Rate: 2.56%</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Report Content -->
+            <div id="detailedReportContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-file-alt"></i> Detailed Report</h5>
+                        <p>This section would contain detailed tables and graphs.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backup Content -->
+            <div id="backupContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-cloud-download-alt"></i> Backup Data</h5>
+                        <button class="btn btn-success">Start Backup</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Restore Content -->
+            <div id="restoreContent" class="content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-cloud-upload-alt"></i> Restore Data</h5>
+                        <button class="btn btn-warning">Start Restore</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Chart.js code
+            var ctx1 = document.getElementById('userActivityChart').getContext('2d');
+            var myChart1 = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Engineers', 'Admins'],
+                    datasets: [{
+                        label: 'Number of Logins',
+                        data: [50, 20],
+                        backgroundColor: ['rgba(54, 162, 235, 0.5)', 'rgba(255, 99, 132, 0.5)'],
+                        borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            var ctx2 = document.getElementById('productionMetricsChart').getContext('2d');
+            var myChart2 = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                    datasets: [{
+                        label: 'Production Output',
+                        data: [65, 59, 80, 81, 56, 55, 40],
+                        backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Function to handle content display
+            function showContent(target) {
+                $('.content').removeClass('active');
+                $('#' + target).addClass('active');
+            }
+
+            // Sidebar link click handler
+            $('.nav-link').click(function (e) {
+                e.preventDefault();
+                var target = $(this).data('target');
+                if (target) {
+                    showContent(target);
+                }
+            });
+
+            // Sub-item click handler (stops propagation to parent)
+            $('.sub-item').click(function (e) {
+                e.stopPropagation();
+                var target = $(this).data('target');
+                showContent(target);
+            });
+
+            // Sidebar toggle button click handler
+            $('#sidebarToggle').click(function () {
+                $('#sidebar').toggle();
+                $('main').toggleClass('expanded');
+            });
+        });
+    </script>
+</body>
+
+</html>
